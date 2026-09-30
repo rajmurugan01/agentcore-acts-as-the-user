@@ -1,0 +1,33 @@
+
+== 1. The vulnerable baseline: the agent uses its OWN credential ==
+[PASS] open gateway, agent credential, asked by bob -> platform-infra
+       ALLOWED  target invoked: 1  | [{"type": "text", "text": "{\"pr\":\"https://example.invalid/acme/platform-infra/pull/a6982b\",\"repo\":\"acme
+
+== 2. A policy alone does not fix it: agent still uses its own credential ==
+[PASS] guarded gateway, agent credential, asked by bob -> platform-infra
+       ALLOWED  target invoked: 1  | [{"type": "text", "text": "{\"pr\":\"https://example.invalid/acme/platform-infra/pull/c08658\",\"repo\":\"acme
+
+== 3. The fix: the agent forwards the ASKING USER's token, Gateway Policy decides ==
+[PASS] guarded, bob's token -> platform-infra
+       DENIED   target invoked: 0  | {"code": -32002, "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [No policy
+[PASS] guarded, alice's token -> platform-infra
+       ALLOWED  target invoked: 1  | [{"type": "text", "text": "{\"pr\":\"https://example.invalid/acme/platform-infra/pull/45916e\",\"repo\":\"acme
+[PASS] guarded, alice's token -> payments (no permit)
+       DENIED   target invoked: 0  | {"code": -32002, "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [No policy
+[PASS] guarded, bob's token -> docs (open to all)
+       ALLOWED  target invoked: 1  | [{"type": "text", "text": "{\"pr\":\"https://example.invalid/acme/docs/pull/3d09ff\",\"repo\":\"acme/docs\"}"}
+
+== 3b. The group match is exact, not a substring ==
+[PASS] guarded, bob in platform-readonly -> platform-infra
+       DENIED   target invoked: 0  | {"code": -32002, "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [No policy
+[PASS] guarded, carol in [platform, oncall] -> platform-infra
+       ALLOWED  target invoked: 1  | [{"type": "text", "text": "{\"pr\":\"https://example.invalid/acme/platform-infra/pull/2e5b7b\",\"repo\":\"acme
+
+== 4. The limit: a stale claim on a still-valid token ==
+       (bob was on the platform team, has just been removed; his old token is still valid)
+[PASS] guarded, bob's OLD token -> platform-infra
+       ALLOWED  target invoked: 1  | [{"type": "text", "text": "{\"pr\":\"https://example.invalid/acme/platform-infra/pull/9c3820\",\"repo\":\"acme
+[PASS] guarded, bob's FRESH token -> platform-infra
+       DENIED   target invoked: 0  | {"code": -32002, "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [No policy
+
+10/10 cases behaved as expected
