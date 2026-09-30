@@ -57,9 +57,9 @@ password are throwaway and live only in the demo user pool.
 ## Cost
 
 Published rates: Gateway $5 per million invocations, Policy $25 per million authorisations
-([pricing](https://aws.amazon.com/bedrock/agentcore/pricing/)). One full demo run makes about 20 calls, so the
-estimate is well under one cent, plus a few cents of idle Cognito, DynamoDB and Lambda that round to zero on
-free tiers. This is an estimate from list prices, not a measured bill.
+([pricing](https://aws.amazon.com/bedrock/agentcore/pricing/)). One full demo run makes ten tool calls, so the
+AgentCore side is well under one cent. The small Cognito, DynamoDB and Lambda charges around it are not priced
+here. This is an estimate from list prices, not a measured bill.
 
 ## Not in scope
 
